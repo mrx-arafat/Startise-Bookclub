@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const bookController = require("../controllers/bookController");
+const { getAllBooks, addBook } = require("../controllers/bookController");
 
-router.get("/", bookController.getAllBooks);
-router.post("/", bookController.addBook);
-router.post("/:bookId/borrow", bookController.borrowBook);
+// Define routes
+router.get("/", getAllBooks); // Fix: Add the controller function
+router.post("/", addBook); // Fix: Add the controller function
 
 module.exports = router;

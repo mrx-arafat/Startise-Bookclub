@@ -5,9 +5,15 @@ require("dotenv").config();
 
 const app = express();
 
+// Import routes
+const bookRoutes = require("./routes/bookRoutes"); // Add this line
+
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Use routes
+app.use("/api/books", bookRoutes); // Add this line
 
 // MongoDB Connection
 mongoose
