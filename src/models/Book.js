@@ -1,22 +1,23 @@
+// models/Book.js
 const mongoose = require("mongoose");
 
 const bookSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, "Book title is required"],
+      required: true,
       trim: true,
     },
     author: {
       type: String,
-      required: [true, "Author name is required"],
+      required: true,
       trim: true,
     },
     isbn: {
       type: String,
-      trim: true,
+      required: true,
       unique: true,
-      sparse: true,
+      trim: true,
     },
     status: {
       type: String,
@@ -25,7 +26,12 @@ const bookSchema = new mongoose.Schema(
     },
     category: {
       type: String,
+      required: true,
       trim: true,
+    },
+    coverImage: {
+      type: String,
+      default: "/default-book-cover.jpg",
     },
   },
   {
@@ -33,4 +39,5 @@ const bookSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Book", bookSchema);
+const Book = mongoose.model("Book", bookSchema);
+module.exports = Book;

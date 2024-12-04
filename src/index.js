@@ -6,14 +6,16 @@ require("dotenv").config();
 const app = express();
 
 // Import routes
-const bookRoutes = require("./routes/bookRoutes"); // Add this line
+const bookRoutes = require("./routes/bookRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Use routes
-app.use("/api/books", bookRoutes); // Add this line
+// Routes
+app.use("/api/books", bookRoutes);
+app.use("/api/auth", authRoutes);
 
 // MongoDB Connection
 mongoose
@@ -21,13 +23,8 @@ mongoose
   .then(() => console.log("📚 Connected to Startise Bookclub Database"))
   .catch((err) => console.error("Database connection error:", err));
 
-// Welcome route
-app.get("/", (req, res) => {
-  res.send("Welcome to Startise Bookclub Management System");
-});
-
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Startise Bookclub Server running on port ${PORT}`);
 });
