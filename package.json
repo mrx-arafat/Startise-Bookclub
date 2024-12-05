@@ -5,7 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "create-admin": "node scripts/createAdmin.js",
+    "test-db": "node testDb.js"
   },
   "keywords": [
     "bookclub",
