@@ -7,6 +7,8 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "create-admin": "node scripts/createAdmin.js",
+    "create-users": "node scripts/createUsers.js",
+     "recreate-user": "node scripts/recreateUser.js",
     "test-db": "node testDb.js"
   },
   "keywords": [
