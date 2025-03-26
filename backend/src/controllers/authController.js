@@ -1,9 +1,50 @@
-const express = require("express");
-const router = express.Router();
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { generateToken } = require("../utils/jwt");
 
-router.post("/login", async (req, res) => {
+const register = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Check if user exists
+    let user = await User.findOne({ email: email.toLowerCase() });
+    if (user) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create new user
+    user = new User({
+      name,
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      isAdmin: false,
+    });
+
+    await user.save();
+
+    // Generate token
+    const token = generateToken(user);
+
+    res.status(201).json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -13,7 +54,9 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    if (password !== user.password) {
+    // Compare password with hashed password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
@@ -31,9 +74,9 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
-});
+};
 
-router.post("/admin/login", async (req, res) => {
+const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -47,7 +90,9 @@ router.post("/admin/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid admin credentials" });
     }
 
-    if (password !== admin.password) {
+    // Compare password with hashed password
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
       return res.status(401).json({ message: "Invalid admin credentials" });
     }
 
@@ -65,6 +110,10 @@ router.post("/admin/login", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
-});
+};
 
-module.exports = router;
+module.exports = {
+  register,
+  login,
+  adminLogin,
+};
