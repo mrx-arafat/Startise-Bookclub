@@ -1,0 +1,281 @@
+{
+  "info": {
+    "name": "Startise Bookclub",
+    "description": "API documentation for the Startise Bookclub application",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Register a new user"
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Login user and get JWT token"
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            },
+            "description": "Get current user profile"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Books",
+      "item": [
+        {
+          "name": "Get All Books",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books"]
+            },
+            "description": "Get all books"
+          }
+        },
+        {
+          "name": "Get Book by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/books/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "book_id_here"
+                }
+              ]
+            },
+            "description": "Get a specific book by ID"
+          }
+        },
+        {
+          "name": "Create Book",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"The Great Gatsby\",\n  \"author\": \"F. Scott Fitzgerald\",\n  \"description\": \"A story of decadence and excess...\",\n  \"isbn\": \"978-0743273565\",\n  \"publicationYear\": 1925,\n  \"quantity\": 5,\n  \"category\": \"Classic Literature\"\n}"
+            },
+            "description": "Create a new book (Admin only)"
+          }
+        },
+        {
+          "name": "Update Book",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/books/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "book_id_here"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"quantity\": 10\n}"
+            },
+            "description": "Update a book (Admin only)"
+          }
+        },
+        {
+          "name": "Delete Book",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/books/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "book_id_here"
+                }
+              ]
+            },
+            "description": "Delete a book (Admin only)"
+          }
+        },
+        {
+          "name": "Borrow Book",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/books/:id/borrow",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books", ":id", "borrow"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "book_id_here"
+                }
+              ]
+            },
+            "description": "Borrow a book"
+          }
+        },
+        {
+          "name": "Return Book",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/books/:id/return",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books", ":id", "return"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "book_id_here"
+                }
+              ]
+            },
+            "description": "Return a borrowed book"
+          }
+        },
+        {
+          "name": "Get User's Borrowed Books",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/books/me/borrowed",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "books", "me", "borrowed"]
+            },
+            "description": "Get current user's borrowed books"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "token",
+      "value": "your_jwt_token_here"
+    }
+  ]
+}
