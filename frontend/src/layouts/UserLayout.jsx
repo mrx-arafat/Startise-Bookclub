@@ -135,7 +135,9 @@ export default function UserLayout() {
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
-            <h1 className="text-lg font-semibold">Book Club</h1>
+            <h1 className="text-lg font-semibold">
+              Welcome to Startise Book Club!
+            </h1>
           </header>
           <main className="flex-1 overflow-auto">
             <div className="container mx-auto p-8">

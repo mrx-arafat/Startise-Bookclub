@@ -16,10 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(4, "Password must be at least 4 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 export default function UserLogin() {
@@ -56,7 +57,7 @@ export default function UserLogin() {
       if (response.data.token) {
         // Check if the user is not an admin
         if (response.data.user.isAdmin) {
-          toast.error("Please use the admin login page");
+          toast.error("Arafat sir knows you're up to something fishy now…");
           return;
         }
 
@@ -77,60 +78,168 @@ export default function UserLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <Card className="w-[400px]">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">
-            Welcome to Book Club
-          </CardTitle>
-          <p className="text-center text-sm text-muted-foreground">
-            Sign in to your account to borrow books
-          </p>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="user@example.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Enter your password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.15 }}
+          transition={{ duration: 2 }}
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at center, #333 2px, transparent 2px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <motion.div
+          animate={{
+            rotate: [0, 360],
+          }}
+          transition={{
+            duration: 50,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-20"
+          style={{
+            background:
+              "linear-gradient(45deg, #1a1a1a 25%, transparent 25%), linear-gradient(-45deg, #1a1a1a 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1a1a1a 75%), linear-gradient(-45deg, transparent 75%, #1a1a1a 75%)",
+            backgroundSize: "40px 40px",
+            backgroundPosition: "0 0, 0 20px, 20px -20px, -20px 0px",
+          }}
+        />
+      </div>
+
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: 0.5,
+            type: "spring",
+            stiffness: 100,
+          }}
+          className="relative z-10"
+        >
+          <Card className="w-[450px] bg-[#111111] border border-zinc-800 shadow-2xl shadow-black/50">
+            <CardHeader className="space-y-6 pb-8">
+              <motion.div
+                className="flex justify-center"
+                initial={{ y: -20 }}
+                animate={{ y: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 20,
+                }}
+              >
+                <motion.img
+                  src="/img/startise_logo.png"
+                  alt="Startise Logo"
+                  className="h-20 w-auto drop-shadow-2xl"
+                  whileHover={{
+                    scale: 1.05,
+                    rotate: [0, -5, 5, 0],
+                    transition: { duration: 0.5 },
+                  }}
+                />
+              </motion.div>
+              <div className="space-y-2">
+                <CardTitle className="text-3xl font-bold text-center text-white">
+                  Startise Book Club
+                </CardTitle>
+                <p className="text-center text-zinc-400 text-sm">
+                  Sign in to explore our exclusive collection of books.
+                </p>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
+                  <motion.div
+                    initial={{ x: -30, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-zinc-300 ml-1">
+                            Email
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="email"
+                              placeholder="user@wpdeveloper.com"
+                              className="h-12 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-zinc-600"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-400" />
+                        </FormItem>
+                      )}
+                    />
+                  </motion.div>
+                  <motion.div
+                    initial={{ x: -30, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-zinc-300 ml-1">
+                            Password
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder="Enter your password"
+                              className="h-12 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-zinc-600 focus:ring-zinc-600"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-400" />
+                        </FormItem>
+                      )}
+                    />
+                  </motion.div>
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      type="submit"
+                      className="w-full h-12 bg-white hover:bg-zinc-100 text-black font-medium transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                          <span>Signing In...</span>
+                        </div>
+                      ) : (
+                        "Sign In"
+                      )}
+                    </Button>
+                  </motion.div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

@@ -90,10 +90,14 @@ export default function AdminLayout() {
       <SidebarHeader className="border-b p-4">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <span className="font-semibold">BC</span>
+            <img
+              src="/img/startise_logo.png"
+              alt="Startise Logo"
+              className="h-6 w-6 object-contain"
+            />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold">Book Club</span>
+            <span className="text-sm font-semibold">Startise Book Club</span>
             <span className="text-xs text-muted-foreground">Admin Panel</span>
           </div>
         </div>
@@ -144,7 +148,7 @@ export default function AdminLayout() {
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
-            <h1 className="text-lg font-semibold">Book Club Admin</h1>
+            <h1 className="text-lg font-semibold">Startise Book Club Admin</h1>
           </header>
           <main className="flex-1 overflow-auto">
             <div className="container mx-auto p-8">

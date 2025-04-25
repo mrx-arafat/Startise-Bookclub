@@ -233,8 +233,8 @@ export default function Suggestions() {
                     <div className="flex items-center justify-between">
                       <h3 className="font-medium">{suggestion.title}</h3>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span className="italic">
-                          Thank you for your suggestion!
+                        <span className="italic bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-medium">
+                          Received!
                         </span>
                       </div>
                     </div>
