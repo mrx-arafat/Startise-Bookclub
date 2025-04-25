@@ -1,30 +1,16 @@
 const express = require("express");
 const router = express.Router();
+const authRoutes = require("../controllers/authController");
+const userRoutes = require("../controllers/userController");
+const bookRoutes = require("../controllers/bookController");
+const borrowRoutes = require("../controllers/borrowController");
+const suggestionRoutes = require("../controllers/suggestionController");
 
-// Import route modules
-const authRoutes = require("./auth");
-const bookRoutes = require("./books");
-
-// Use route modules
+// Mount routes
 router.use("/auth", authRoutes);
+router.use("/users", userRoutes);
 router.use("/books", bookRoutes);
-
-/**
- * @swagger
- * /api/test:
- *   get:
- *     summary: Test API endpoint
- *     description: Returns a test message to verify the API is working
- *     responses:
- *       200:
- *         description: Test message
- */
-router.get("/test", (req, res) => {
-  res.json({
-    success: true,
-    message: "API is working correctly!",
-    timestamp: new Date().toISOString(),
-  });
-});
+router.use("/borrow-requests", borrowRoutes);
+router.use("/book-suggestions", suggestionRoutes);
 
 module.exports = router;

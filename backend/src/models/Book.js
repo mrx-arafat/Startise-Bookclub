@@ -1,62 +1,21 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
-const bookSchema = new mongoose.Schema(
+const BookSchema = new Schema(
   {
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    author: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    category: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    coverImage: {
-      type: String,
-      trim: true,
-    },
-    description: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    isAvailable: {
-      type: Boolean,
-      default: true,
-    },
+    title: { type: String, required: true },
+    author: { type: String, required: true },
+    category: { type: String, required: false },
+    isAvailable: { type: Boolean, default: true },
+    quantity: { type: Number, required: true, min: 1 },
+    coverImage: { type: String, required: false },
     status: {
       type: String,
-      enum: ["available", "borrowed", "maintenance"],
-      default: "available",
-    },
-    borrowedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
-    },
-    borrowedAt: {
-      type: Date,
-      default: null,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-module.exports = mongoose.model("Book", bookSchema);
+module.exports = mongoose.model("Book", BookSchema);

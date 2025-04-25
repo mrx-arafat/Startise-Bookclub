@@ -1,53 +1,27 @@
+const express = require("express");
+const router = express.Router();
 const Book = require("../models/Book");
+const { validateUser, validateAdmin } = require("../utils/jwt");
 const mongoose = require("mongoose");
 
-// Get all books (Public)
-const getAllBooks = async (req, res) => {
-  try {
-    const books = await Book.find();
-    res.status(200).json(books);
-  } catch (error) {
-    console.error("Get books error:", error);
-    res
-      .status(500)
-      .json({ message: "Error fetching books", error: error.message });
-  }
-};
-
-// Get a book by ID (Public)
-const getBookById = async (req, res) => {
-  try {
-    const book = await Book.findById(req.params.id);
-    if (!book) {
-      return res.status(404).json({ message: "Book not found" });
-    }
-    res.status(200).json(book);
-  } catch (error) {
-    console.error("Get book error:", error);
-    res
-      .status(500)
-      .json({ message: "Error fetching book", error: error.message });
-  }
-};
-
 // Create a new book (Admin only)
-const createBook = async (req, res) => {
+router.post("/", validateUser, validateAdmin, async (req, res) => {
   try {
-    const { title, author, category, quantity, coverImage, description } =
-      req.body;
+    const { title, author, category, quantity, coverImage } = req.body;
 
+    // Create new book
     const book = new Book({
       title,
       author,
       category,
       quantity,
       coverImage,
-      description,
       isAvailable: true,
-      status: "available",
     });
 
+    // Save book to database
     await book.save();
+
     res.status(201).json({
       message: "Book created successfully",
       book,
@@ -58,44 +32,150 @@ const createBook = async (req, res) => {
       .status(500)
       .json({ message: "Error creating book", error: error.message });
   }
-};
+});
 
-// Update a book (Admin only)
-const updateBook = async (req, res) => {
+// Get all books (Public)
+router.get("/", async (req, res) => {
   try {
-    const {
-      title,
-      author,
-      category,
-      quantity,
-      coverImage,
-      description,
-      isAvailable,
-      status,
-    } = req.body;
-    const bookId = req.params.id;
+    const books = await Book.aggregate([
+      {
+        $lookup: {
+          from: "borrowrequests",
+          localField: "_id",
+          foreignField: "bookId",
+          as: "borrowRequests",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "borrowRequests.userId",
+          foreignField: "_id",
+          as: "borrowUsers",
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          author: 1,
+          category: 1,
+          quantity: 1,
+          isAvailable: 1,
+          coverImage: 1,
+          borrowers: {
+            $filter: {
+              input: "$borrowRequests",
+              as: "request",
+              cond: {
+                $and: [
+                  { $eq: ["$$request.status", "approved"] },
+                  { $eq: ["$$request.returnedDate", null] },
+                ],
+              },
+            },
+          },
+        },
+      },
+    ]);
 
-    const book = await Book.findById(bookId);
-    if (!book) {
+    res.status(200).json(books);
+  } catch (error) {
+    console.error("Get books error:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching books", error: error.message });
+  }
+});
+
+// Get a book by ID (Public)
+router.get("/:id", async (req, res) => {
+  try {
+    const bookId = req.params.id;
+    const books = await Book.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(bookId) }
+      },
+      {
+        $lookup: {
+          from: "borrowrequests",
+          localField: "_id",
+          foreignField: "bookId",
+          as: "borrowRequests",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "borrowRequests.userId",
+          foreignField: "_id",
+          as: "borrowUsers",
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          author: 1,
+          category: 1,
+          quantity: 1,
+          isAvailable: 1,
+          coverImage: 1,
+          borrowers: {
+            $filter: {
+              input: "$borrowRequests",
+              as: "request",
+              cond: {
+                $and: [
+                  { $eq: ["$$request.status", "approved"] },
+                  { $eq: ["$$request.returnedDate", null] },
+                ],
+              },
+            },
+          },
+        },
+      },
+    ]);
+
+    if (!books.length) {
       return res.status(404).json({ message: "Book not found" });
     }
 
-    // Update book fields
-    book.title = title || book.title;
-    book.author = author || book.author;
-    book.category = category || book.category;
-    book.quantity = quantity || book.quantity;
-    book.coverImage = coverImage || book.coverImage;
-    book.description = description || book.description;
-    book.isAvailable =
-      isAvailable !== undefined ? isAvailable : book.isAvailable;
-    book.status = status || book.status;
+    res.status(200).json(books[0]);
+  } catch (error) {
+    console.error("Get book by ID error:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching book by ID", error: error.message });
+  }
+});
 
-    await book.save();
+// Update a book by ID (Admin only)
+router.put("/:id", validateUser, validateAdmin, async (req, res) => {
+  try {
+    const { title, author, category, quantity, coverImage, isAvailable } =
+      req.body;
+    const bookId = req.params.id;
+
+    // Create updates object with only the provided fields
+    const updates = {};
+    if (title !== undefined) updates.title = title;
+    if (author !== undefined) updates.author = author;
+    if (category !== undefined) updates.category = category;
+    if (quantity !== undefined) updates.quantity = quantity;
+    if (coverImage !== undefined) updates.coverImage = coverImage;
+    if (isAvailable !== undefined) updates.isAvailable = isAvailable;
+
+    // Find and update the book
+    const updatedBook = await Book.findByIdAndUpdate(bookId, updates, {
+      new: true,
+    });
+
+    if (!updatedBook) {
+      return res.status(404).json({ message: "Book not found" });
+    }
 
     res.status(200).json({
       message: "Book updated successfully",
-      book,
+      book: updatedBook,
     });
   } catch (error) {
     console.error("Update book error:", error);
@@ -103,22 +183,22 @@ const updateBook = async (req, res) => {
       .status(500)
       .json({ message: "Error updating book", error: error.message });
   }
-};
+});
 
-// Delete a book (Admin only)
-const deleteBook = async (req, res) => {
+// Delete a book by ID (Admin only)
+router.delete("/:id", validateUser, validateAdmin, async (req, res) => {
   try {
     const bookId = req.params.id;
 
-    const book = await Book.findById(bookId);
-    if (!book) {
+    const deletedBook = await Book.findByIdAndDelete(bookId);
+
+    if (!deletedBook) {
       return res.status(404).json({ message: "Book not found" });
     }
 
-    await book.deleteOne();
-
     res.status(200).json({
       message: "Book deleted successfully",
+      book: deletedBook,
     });
   } catch (error) {
     console.error("Delete book error:", error);
@@ -126,12 +206,6 @@ const deleteBook = async (req, res) => {
       .status(500)
       .json({ message: "Error deleting book", error: error.message });
   }
-};
+});
 
-module.exports = {
-  getAllBooks,
-  getBookById,
-  createBook,
-  updateBook,
-  deleteBook,
-};
+module.exports = router;

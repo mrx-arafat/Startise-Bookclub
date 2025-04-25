@@ -1,16 +1,16 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const morgan = require("morgan");
-const swaggerUi = require("swagger-ui-express");
-const swaggerJsdoc = require("swagger-jsdoc");
 require("dotenv").config();
+const connectDB = require("./config/db");
 
 // Import routes
 const routes = require("./routes");
-
 // Initialize express app
 const app = express();
+
+// Connect to MongoDB
+connectDB();
 
 // Middleware
 app.use(cors());
@@ -18,40 +18,10 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB Connection
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
-
-// Swagger Configuration
-const swaggerOptions = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Startise Bookclub API",
-      version: "1.0.0",
-      description: "API documentation for Startise Bookclub",
-    },
-    servers: [
-      {
-        url: `http://localhost:${process.env.PORT}`,
-        description: "Development server",
-      },
-    ],
-  },
-  apis: ["./src/routes/*.js"],
-};
-
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
-// Welcome route
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to Startise Bookclub API" });
+  res.send("Hello World");
 });
-
-// API Routes
+// Routes
 app.use("/api", routes);
 
 // Error handling middleware
@@ -73,10 +43,12 @@ app.use((req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
