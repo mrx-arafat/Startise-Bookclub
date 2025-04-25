@@ -77,11 +77,15 @@ export default function UserLayout() {
       <SidebarHeader className="border-b p-4">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <span className="font-semibold">BC</span>
+            <img
+              src="/img/startise_logo.png"
+              alt="Startise Logo"
+              className="h-6 w-6 object-contain"
+            />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold">Book Club</span>
-            <span className="text-xs text-muted-foreground">Member Portal</span>
+            <span className="text-sm font-semibold">Startise Book Club</span>
+            <span className="text-xs text-muted-foreground">User Portal</span>
           </div>
         </div>
       </SidebarHeader>
