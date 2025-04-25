@@ -60,7 +60,8 @@ router.get("/", validateUser, validateAdmin, async (req, res) => {
   try {
     const requests = await BorrowRequest.find()
       .populate("bookId")
-      .populate("userId", "-password");
+      .populate("userId", "-password")
+      .sort({ createdAt: -1 });
     res.status(200).json(requests);
   } catch (error) {
     console.error("Get borrow requests error:", error);
@@ -74,9 +75,9 @@ router.get("/", validateUser, validateAdmin, async (req, res) => {
 // Get user's borrow requests (Authenticated user)
 router.get("/me", validateUser, async (req, res) => {
   try {
-    const requests = await BorrowRequest.find({ userId: req.user.id }).populate(
-      "bookId"
-    );
+    const requests = await BorrowRequest.find({ userId: req.user.id })
+      .populate("bookId")
+      .sort({ createdAt: -1 });
     res.status(200).json(requests);
   } catch (error) {
     console.error("Get user borrow requests error:", error);
@@ -92,6 +93,11 @@ router.put("/:id", validateUser, validateAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     const requestId = req.params.id;
+
+    // Validate status
+    if (!["approved", "rejected", "returned"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
 
     const borrowRequest = await BorrowRequest.findById(requestId);
     if (!borrowRequest) {
@@ -133,9 +139,10 @@ router.put("/:id", validateUser, validateAdmin, async (req, res) => {
     });
   } catch (error) {
     console.error("Update borrow request error:", error);
-    res
-      .status(500)
-      .json({ message: "Error updating borrow request", error: error.message });
+    res.status(500).json({ 
+      message: "Error updating borrow request", 
+      error: error.message 
+    });
   }
 });
 
