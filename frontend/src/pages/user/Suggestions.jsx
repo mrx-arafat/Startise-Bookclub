@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ExternalLink } from "lucide-react";
 
@@ -94,20 +93,6 @@ export default function Suggestions() {
       return;
     }
     createSuggestion.mutate(data);
-  };
-
-  const getStatusBadge = (status) => {
-    const statusColors = {
-      pending: "bg-yellow-500",
-      approved: "bg-green-500",
-      rejected: "bg-red-500",
-    };
-
-    return (
-      <Badge className={`${statusColors[status.toLowerCase()]} text-white`}>
-        {status}
-      </Badge>
-    );
   };
 
   return (
@@ -223,7 +208,7 @@ export default function Suggestions() {
           <CardHeader>
             <CardTitle>Your Suggestions</CardTitle>
             <CardDescription>
-              Track the status of your suggestions
+              Thank you for helping us improve our collection
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -247,7 +232,11 @@ export default function Suggestions() {
                   >
                     <div className="flex items-center justify-between">
                       <h3 className="font-medium">{suggestion.title}</h3>
-                      {getStatusBadge(suggestion.status || "pending")}
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span className="italic">
+                          Thank you for your suggestion!
+                        </span>
+                      </div>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       By {suggestion.author}
@@ -259,19 +248,6 @@ export default function Suggestions() {
                         Suggested on:{" "}
                         {new Date(suggestion.createdAt).toLocaleDateString()}
                       </span>
-                      {suggestion.link && (
-                        <>
-                          <span>•</span>
-                          <a
-                            href={suggestion.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-blue-500 hover:text-blue-600"
-                          >
-                            Reference <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </>
-                      )}
                     </div>
                   </div>
                 ))
