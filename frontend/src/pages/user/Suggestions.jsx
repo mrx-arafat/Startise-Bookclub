@@ -24,13 +24,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import React from "react";
+import { ExternalLink } from "lucide-react";
 
 const suggestionSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
   author: z.string().min(2, "Author must be at least 2 characters"),
   category: z.string().min(1, "Please select a category"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
   link: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
 });
 
@@ -42,42 +41,49 @@ export default function Suggestions() {
   const token = localStorage.getItem("userToken");
   const user = userString ? JSON.parse(userString) : null;
 
-  // Debug authentication state
-  console.log("Auth Debug:", {
-    userString,
-    token,
-    user,
-    hasId: user?.id,
-  });
-
   const form = useForm({
     resolver: zodResolver(suggestionSchema),
     defaultValues: {
       title: "",
       author: "",
       category: "",
-      description: "",
       link: "",
     },
   });
 
-  const { data: userSuggestions, isError: suggestionsError } = useQuery({
+  const {
+    data: userSuggestions,
+    isError: suggestionsError,
+    error,
+    isLoading,
+  } = useQuery({
     queryKey: ["userSuggestions", user?.id],
-    queryFn: () => suggestions.getUserSuggestions(user?.id),
+    queryFn: () => {
+      if (!user?.id) {
+        throw new Error("User ID is required");
+      }
+      return suggestions.getUserSuggestions();
+    },
     enabled: !!user?.id && !!token,
   });
 
   const createSuggestion = useMutation({
-    mutationFn: (data) => suggestions.create({ ...data, userId: user.id }),
+    mutationFn: (data) => {
+      if (!user?.id) {
+        throw new Error("User ID is required");
+      }
+      return suggestions.create({ ...data, userId: user.id });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(["userSuggestions", user?.id]);
       toast.success("Book suggestion submitted successfully!");
       form.reset();
     },
     onError: (error) => {
-      console.error("Suggestion error:", error);
       toast.error(
-        error.response?.data?.message || "Failed to submit suggestion"
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to submit suggestion"
       );
     },
   });
@@ -91,16 +97,14 @@ export default function Suggestions() {
   };
 
   const getStatusBadge = (status) => {
-    const variants = {
+    const statusColors = {
       pending: "bg-yellow-500",
       approved: "bg-green-500",
       rejected: "bg-red-500",
     };
 
     return (
-      <Badge
-        className={`${variants[status.toLowerCase()]} text-white capitalize`}
-      >
+      <Badge className={`${statusColors[status.toLowerCase()]} text-white`}>
         {status}
       </Badge>
     );
@@ -108,18 +112,18 @@ export default function Suggestions() {
 
   return (
     <div className="space-y-8">
-      {suggestionsError && (
-        <div className="text-red-500">
-          Error loading suggestions. Please try again later.
-        </div>
-      )}
-
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Suggest a Book</h2>
         <p className="text-muted-foreground">
           Help us improve our collection by suggesting books
         </p>
       </div>
+
+      {!user?.id && (
+        <div className="text-red-500 bg-red-50 p-4 rounded-md">
+          Please log in to view and submit suggestions
+        </div>
+      )}
 
       <div className="grid gap-8 md:grid-cols-2">
         {/* Suggestion Form */}
@@ -180,23 +184,6 @@ export default function Suggestions() {
 
                 <FormField
                   control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Enter book description"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="link"
                   render={({ field }) => (
                     <FormItem>
@@ -209,7 +196,8 @@ export default function Suggestions() {
                         />
                       </FormControl>
                       <FormDescription>
-                        Add a link to the book's page on Amazon, Goodreads, etc.
+                        Optional: Add a link to the book's page on Amazon,
+                        Goodreads, etc.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -240,32 +228,54 @@ export default function Suggestions() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {userSuggestions?.map((suggestion) => (
-                <div
-                  key={suggestion._id}
-                  className="flex flex-col space-y-2 border-b pb-4 last:border-0"
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium">{suggestion.title}</h3>
-                    {getStatusBadge(suggestion.status)}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    By {suggestion.author}
+              {isLoading ? (
+                <p className="text-center text-muted-foreground">
+                  Loading your suggestions...
+                </p>
+              ) : suggestionsError ? (
+                <div className="text-center text-red-500">
+                  <p>Error loading suggestions.</p>
+                  <p className="text-sm">
+                    {error?.message || "Please try again later."}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {suggestion.description}
-                  </p>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>Category: {suggestion.category}</span>
-                    <span>•</span>
-                    <span>
-                      Suggested on:{" "}
-                      {new Date(suggestion.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
                 </div>
-              ))}
-              {!userSuggestions?.length && (
+              ) : userSuggestions?.length > 0 ? (
+                userSuggestions.map((suggestion) => (
+                  <div
+                    key={suggestion._id}
+                    className="flex flex-col space-y-2 border-b pb-4 last:border-0"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium">{suggestion.title}</h3>
+                      {getStatusBadge(suggestion.status || "pending")}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      By {suggestion.author}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                      <span>Category: {suggestion.category}</span>
+                      <span>•</span>
+                      <span>
+                        Suggested on:{" "}
+                        {new Date(suggestion.createdAt).toLocaleDateString()}
+                      </span>
+                      {suggestion.link && (
+                        <>
+                          <span>•</span>
+                          <a
+                            href={suggestion.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-blue-500 hover:text-blue-600"
+                          >
+                            Reference <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
                 <p className="text-center text-muted-foreground">
                   You haven't made any suggestions yet
                 </p>
