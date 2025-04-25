@@ -196,8 +196,9 @@ export default function BorrowRequests() {
                             )}
                           />
                           <span className="text-[10px] text-muted-foreground">
-                            {request.bookId.quantity}{" "}
-                            {request.bookId.quantity > 1 ? "copies" : "copy"}
+                            {/* {request.bookId.quantity}{" "}
+                            {request.bookId.quantity > 1 ? "copies" : "copy"} */}
+                            By {request.bookId.author}
                           </span>
                         </div>
                         {request.bookId.category && (
