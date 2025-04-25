@@ -179,13 +179,11 @@ export default function Books() {
                     <div
                       className={cn(
                         "size-2 rounded-full",
-                        book.isAvailable && book.quantity > 0
-                          ? "bg-green-500"
-                          : "bg-red-500"
+                        book.isAvailable ? "bg-green-500" : "bg-red-500"
                       )}
                     />
                     <span className="text-[10px] font-medium text-white">
-                      {book.quantity} {book.quantity > 1 ? "copies" : "copy"}
+                      {book.isAvailable ? "Available" : "Unavailable"}
                     </span>
                   </div>
                 </div>
@@ -207,15 +205,11 @@ export default function Books() {
                 <Button
                   className="w-full h-7 text-xs"
                   onClick={() => handleBorrowClick(book)}
-                  disabled={
-                    !book.isAvailable ||
-                    book.quantity < 1 ||
-                    borrowMutation.isLoading
-                  }
+                  disabled={!book.isAvailable || borrowMutation.isLoading}
                 >
                   {borrowMutation.isLoading && selectedBook?._id === book._id
                     ? "Sending Request..."
-                    : book.isAvailable && book.quantity > 0
+                    : book.isAvailable
                     ? "Borrow Book"
                     : "Currently Unavailable"}
                 </Button>
