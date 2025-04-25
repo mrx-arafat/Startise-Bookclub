@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import axios from "axios";
+import { suggestions } from "@/lib/api/suggestions";
 import {
   Card,
   CardContent,
@@ -22,15 +22,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import React from "react";
 
 const suggestionSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -42,7 +36,19 @@ const suggestionSchema = z.object({
 
 export default function Suggestions() {
   const queryClient = useQueryClient();
-  const user = JSON.parse(localStorage.getItem("userUser") || "{}");
+
+  // Get user data and token
+  const userString = localStorage.getItem("userUser");
+  const token = localStorage.getItem("userToken");
+  const user = userString ? JSON.parse(userString) : null;
+
+  // Debug authentication state
+  console.log("Auth Debug:", {
+    userString,
+    token,
+    user,
+    hasId: user?.id,
+  });
 
   const form = useForm({
     resolver: zodResolver(suggestionSchema),
@@ -55,55 +61,21 @@ export default function Suggestions() {
     },
   });
 
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const response = await axios.get(
-        "http://localhost:5001/api/books/categories",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
-        }
-      );
-      return response.data;
-    },
-  });
-
-  const { data: suggestions } = useQuery({
-    queryKey: ["suggestions"],
-    queryFn: async () => {
-      const response = await axios.get(
-        `http://localhost:5001/api/suggestions/user/${user._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
-        }
-      );
-      return response.data;
-    },
+  const { data: userSuggestions, isError: suggestionsError } = useQuery({
+    queryKey: ["userSuggestions", user?.id],
+    queryFn: () => suggestions.getUserSuggestions(user?.id),
+    enabled: !!user?.id && !!token,
   });
 
   const createSuggestion = useMutation({
-    mutationFn: async (data) => {
-      const response = await axios.post(
-        "http://localhost:5001/api/suggestions",
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
-        }
-      );
-      return response.data;
-    },
+    mutationFn: (data) => suggestions.create({ ...data, userId: user.id }),
     onSuccess: () => {
-      queryClient.invalidateQueries(["suggestions"]);
+      queryClient.invalidateQueries(["userSuggestions", user?.id]);
       toast.success("Book suggestion submitted successfully!");
       form.reset();
     },
     onError: (error) => {
+      console.error("Suggestion error:", error);
       toast.error(
         error.response?.data?.message || "Failed to submit suggestion"
       );
@@ -111,6 +83,10 @@ export default function Suggestions() {
   });
 
   const onSubmit = (data) => {
+    if (!user?.id || !token) {
+      toast.error("Please log in to submit suggestions");
+      return;
+    }
     createSuggestion.mutate(data);
   };
 
@@ -132,6 +108,12 @@ export default function Suggestions() {
 
   return (
     <div className="space-y-8">
+      {suggestionsError && (
+        <div className="text-red-500">
+          Error loading suggestions. Please try again later.
+        </div>
+      )}
+
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Suggest a Book</h2>
         <p className="text-muted-foreground">
@@ -188,23 +170,9 @@ export default function Suggestions() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Category</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories?.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input placeholder="Enter book category" {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -272,7 +240,7 @@ export default function Suggestions() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {suggestions?.map((suggestion) => (
+              {userSuggestions?.map((suggestion) => (
                 <div
                   key={suggestion._id}
                   className="flex flex-col space-y-2 border-b pb-4 last:border-0"
@@ -297,7 +265,7 @@ export default function Suggestions() {
                   </div>
                 </div>
               ))}
-              {suggestions?.length === 0 && (
+              {!userSuggestions?.length && (
                 <p className="text-center text-muted-foreground">
                   You haven't made any suggestions yet
                 </p>
