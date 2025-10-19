@@ -41,7 +41,7 @@ export default function BorrowRequests() {
     queryKey: ["borrowRequests"],
     queryFn: async () => {
       const response = await axios.get(
-        "http://localhost:5001/api/borrow-requests/me",
+        "https://gentle-garden-502.x-cloud.app/api/borrow-requests/me",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -55,7 +55,7 @@ export default function BorrowRequests() {
   const cancelMutation = useMutation({
     mutationFn: async (requestId) => {
       const response = await axios.delete(
-        `http://localhost:5001/api/borrow-requests/${requestId}`,
+        `https://gentle-garden-502.x-cloud.app/api/borrow-requests/${requestId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,

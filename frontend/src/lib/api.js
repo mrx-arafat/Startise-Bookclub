@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5001/api";
+const BASE_URL = "https://gentle-garden-502.x-cloud.app/api";
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -47,17 +47,17 @@ export const books = {
 
 export const borrowRequests = {
   getAll: async () => {
-    const response = await axios.get("http://localhost:5001/api/borrow-requests", {
+    const response = await axios.get("https://gentle-garden-502.x-cloud.app/api/borrow-requests", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
       },
     });
     return response;
   },
-  
+
   updateStatus: async (id, status, additionalData = {}) => {
     const response = await axios.put(
-      `http://localhost:5001/api/borrow-requests/${id}`,
+      `https://gentle-garden-502.x-cloud.app/api/borrow-requests/${id}`,
       { status, ...additionalData },
       {
         headers: {

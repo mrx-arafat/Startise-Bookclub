@@ -49,7 +49,7 @@ export default function AdminLogin() {
     try {
       setIsLoading(true);
       const response = await axios.post(
-        "http://localhost:5001/api/auth/admin/login",
+        "https://gentle-garden-502.x-cloud.app/api/auth/admin/login",
         values
       );
 

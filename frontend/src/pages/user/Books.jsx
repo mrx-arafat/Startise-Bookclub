@@ -56,7 +56,7 @@ export default function Books() {
   const { data: books, isLoading } = useQuery({
     queryKey: ["books"],
     queryFn: async () => {
-      const response = await axios.get("http://localhost:5001/api/books", {
+      const response = await axios.get("https://gentle-garden-502.x-cloud.app/api/books", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("userToken")}`,
         },
@@ -68,7 +68,7 @@ export default function Books() {
   const borrowMutation = useMutation({
     mutationFn: async ({ bookId, durationInDays }) => {
       const response = await axios.post(
-        "http://localhost:5001/api/borrow-requests",
+        "https://gentle-garden-502.x-cloud.app/api/borrow-requests",
         {
           bookId,
           userId: user._id,
